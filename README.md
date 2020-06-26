@@ -6,6 +6,8 @@ mobx是很好，很容易理解的状态管理工具
 
 ![5ef5a3af7d15c_5ef5a3afc2ef5.gif](https://upload-images.jianshu.io/upload_images/1379609-7bf33b4973a55ec3.gif?imageMogr2/auto-orient/strip)
 
+项目案例源码：
+[https://github.com/xiaqijian/react-mobx-demo](https://github.com/xiaqijian/react-mobx-demo)
 
 
 1.初始化项目
@@ -173,6 +175,8 @@ const Todolist = inject("store")(observer(({ store}) => {
 export default Todolist
 ```
 其他文件的代码具体去GitHub上看地址：
+[https://github.com/xiaqijian/react-mobx-demo](https://github.com/xiaqijian/react-mobx-demo)
+
 
 5.mobx如何使用
 --
