@@ -1,68 +1,185 @@
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+mobx是很好，很容易理解的状态管理工具
 
-## Available Scripts
+先讲一下这个案例是做TODOlist的案例，利用antd样式，用mobx做的状态管理
 
-In the project directory, you can run:
+具体效果如下
 
-### `yarn start`
+![5ef5a3af7d15c_5ef5a3afc2ef5.gif](https://upload-images.jianshu.io/upload_images/1379609-7bf33b4973a55ec3.gif?imageMogr2/auto-orient/strip)
 
-Runs the app in the development mode.<br />
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
 
-The page will reload if you make edits.<br />
-You will also see any lint errors in the console.
 
-### `yarn test`
+1.初始化项目
+--
+第一步用create-react-app初始化一个项目，并打开webpack配置项
 
-Launches the test runner in the interactive watch mode.<br />
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+```
+npx create-react-app react-mobx-demo
 
-### `yarn build`
+cd react-mobx-demo
 
-Builds the app for production to the `build` folder.<br />
-It correctly bundles React in production mode and optimizes the build for the best performance.
+npm run eject
+```
 
-The build is minified and the filenames include the hashes.<br />
-Your app is ready to be deployed!
+2.配置支持修饰符
+--
+目前初始化的项目是不支持修饰符的，安装相关依赖
+ 
+```
+cnpm install --save-dev @babel/plugin-proposal-decorators
+cnpm install --save-dev @babel/plugin-proposal-class-properties
+```
+上面安装好之后，找到项目中package.json文件修改如下
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+```json
 
-### `yarn eject`
+.....
+"babel": {
+   // 新增
+    "plugins": [
+       [
+        "@babel/plugin-proposal-decorators",
+        {
+          "legacy": true
+        }
+      ],
+      [
+        "@babel/plugin-proposal-class-properties",
+        {
+          "loose": true
+        }
+      ]
+    ],
+    "presets": [
+      "react-app"
+    ]
+  },
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+```
+找到babel添加plugins就可以了’
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+3.安装antd和mobx
+--
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+这一步没有什么特别，安装就行
+```
+yarn add antd
+yarn add mobx
+yarn add mobx-react
+```
+4.修改src目录下面的文件
+--
+新建todolist.js, mobx。。。
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+最终目录如下
 
-## Learn More
+![image.png](https://upload-images.jianshu.io/upload_images/1379609-460719967f020e79.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+下面贴代码
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+#### mobx/index.js代码
 
-### Code Splitting
+```
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/code-splitting
+import { observable, action, computed } from 'mobx'
 
-### Analyzing the Bundle Size
+class Store {
+  @observable Inputvalue = ''
+  @observable listdata = [
+    '2222223344',
+    '2222223344',
+    '2222223344',
+    '2222223344',
+    '2222223344'
+  ]
+  @action
+  changeInput (value) {
+     this.Inputvalue = value
+    //  console.log(value)
+  }
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size
+  @computed
+  get todolen () {
+    return this.listdata.length
+  }
 
-### Making a Progressive Web App
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app
+  @action
+  addTodo () {
+    this.listdata = [this.Inputvalue].concat(this.listdata)
+    // let arr = this.listdata
+    // this.listdata = arr.unshift(this.Inputvalue)
+    this.Inputvalue = ""
+    console.log(this.Inputvalue)
+  }
+  @action
+  deletodo (index) {
+    this.listdata.splice(index,1)
+  }
+}
 
-### Advanced Configuration
+export default new Store()
+```
+#### Todolist.js代码
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/advanced-configuration
+```
+import React, { useEffect} from 'react'
+import { Button, Input, List} from 'antd'
+import { inject, observer} from 'mobx-react'
 
-### Deployment
+// const data = [
+//   '22222',
+//   '22222',
+//   '22222',
+//   '22222',
+//   '22222'
+// ]
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/deployment
 
-### `yarn build` fails to minify
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify
+const Todolist = inject("store")(observer(({ store}) => {
+  useEffect(()=>{
+    console.log(store)
+  })
+  return (
+    <div style={{ padding: '10px' }}>
+      <div>
+        <Input
+          onChange={(e)=> { store.changeInput(e.target.value)}}
+          style={{ width: '500px', marginRight: '10px' }}
+          value={store.Inputvalue}
+          placeholder="输入内容"
+        />
+        <Button type="primary" onClick={() => { store.addTodo()}}>添加</Button>
+      </div>
+      <i>一共有{store.todolen}条</i>
+      <div style={{ width: '500px', marginTop: '10px' }}>
+        <List
+          dataSource={store.listdata}
+          bordered
+          renderItem={(item, index) => (
+            <List.Item
+              actions={[<div onClick={()=> { store.deletodo(index)}}>删除</div>]}
+            >{item}</List.Item>
+          )}
+        />
+      </div>
+    </div>
+  )
+}))
+
+
+
+
+export default Todolist
+```
+其他文件的代码具体去GitHub上看地址：
+
+5.mobx如何使用
+--
+大白话意思就是这样子的：
+
+mobx中有个observable方法是监听变量的
+mobx中有个action是修改observable中的变量的
+mobx中有个observer是讲监听变量变化，告诉给视图
+
+具体更加详细的内容，看mobx文档
